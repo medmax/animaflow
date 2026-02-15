@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anima Flow — Cours de yoga & pilates en ligne</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div id="mon-app">
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="logo">{{ brand }}</div>
+        <ul class="nav-links">
+            <li><a href="#accueil">Accueil</a></li>
+            <li><a href="#apropos">A propos</a></li>
+            <li><a href="#cours">Cours</a></li>
+            <li><a href="#bienfaits">Bienfaits</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+    </nav>
+
+    <!-- Hero -->
+    <section id="accueil" class="hero">
+        <div class="hero-content">
+            <h1>{{ titre }}</h1>
+            <p class="hero-subtitle">{{ sousTitre }}</p>
+            <a href="#cours" class="btn">Decouvrir les cours</a>
+        </div>
+    </section>
+
+    <!-- A propos -->
+    <section id="apropos" class="apropos">
+        <div class="container">
+            <h2>Rencontrez Amina</h2>
+            <div class="apropos-content">
+                <div class="apropos-img">
+                    <div class="img-placeholder">A</div>
+                </div>
+                <div class="apropos-text">
+                    <p>{{ aproposTexte }}</p>
+                    <p class="citation">"{{ citation }}"</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Cours -->
+    <section id="cours" class="cours">
+        <div class="container">
+            <h2>Un cours. Trois disciplines.</h2>
+            <div class="cours-grid">
+                <div class="cours-card" v-for="cours in listeCours" :key="cours.nom">
+                    <div class="cours-icon">{{ cours.icone }}</div>
+                    <h3>{{ cours.nom }}</h3>
+                    <p>{{ cours.description }}</p>
+                    <span class="cours-niveau">{{ cours.niveau }}</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bienfaits -->
+    <section id="bienfaits" class="bienfaits">
+        <div class="container">
+            <h2>Pourquoi Anima Flow</h2>
+            <div class="bienfaits-grid">
+                <div class="bienfait-item" v-for="bienfait in bienfaits" :key="bienfait.titre">
+                    <div class="bienfait-icone">{{ bienfait.icone }}</div>
+                    <h3>{{ bienfait.titre }}</h3>
+                    <p>{{ bienfait.texte }}</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact -->
+    <section id="contact" class="contact">
+        <div class="container">
+            <h2>Commence cette semaine</h2>
+            <p class="contact-intro">{{ contactIntro }}</p>
+            <div class="contact-info">
+                <div class="info-item">
+                    <strong>Email</strong>
+                    <span>{{ email }}</span>
+                </div>
+                <div class="info-item">
+                    <strong>Telephone</strong>
+                    <span>{{ telephone }}</span>
+                </div>
+                <div class="info-item">
+                    <strong>Format</strong>
+                    <span>Visioconference · 60 min</span>
+                </div>
+            </div>
+            <div class="contact-btn-wrapper">
+                <button class="btn" @click="ouvrirModal()">Reserver un cours</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal Reservation -->
+    <div class="modal-overlay" v-if="modalOuverte" @click.self="fermerModal()">
+        <div class="modal">
+            <button class="modal-close" @click="fermerModal()">&times;</button>
+
+            <!-- Barre de progression -->
+            <div class="stepper">
+                <div class="step" :class="{ active: etape >= 1, done: etape > 1 }">
+                    <span class="step-num">1</span>
+                    <span class="step-label">Date</span>
+                </div>
+                <div class="step-line" :class="{ active: etape >= 2 }"></div>
+                <div class="step" :class="{ active: etape >= 2 }">
+                    <span class="step-num">2</span>
+                    <span class="step-label">Infos</span>
+                </div>
+            </div>
+
+            <!-- Etape 1 : Calendrier -->
+            <div v-if="etape === 1">
+                <h2 class="modal-title">Choisir une date</h2>
+                <p class="modal-subtitle">Cours disponibles les lundis et jeudis a 19h30</p>
+
+                <div class="calendrier">
+                    <div class="calendrier-header">
+                        <button class="cal-nav" @click="moisPrecedent()">&larr;</button>
+                        <span class="cal-mois">{{ nomMois }} {{ anneeCalendrier }}</span>
+                        <button class="cal-nav" @click="moisSuivant()">&rarr;</button>
+                    </div>
+                    <div class="cal-jours-noms">
+                        <span v-for="j in joursNoms" :key="j">{{ j }}</span>
+                    </div>
+                    <div class="cal-grille">
+                        <div
+                            v-for="(jour, index) in joursCalendrier"
+                            :key="index"
+                            class="cal-jour"
+                            :class="{
+                                'cal-vide': !jour,
+                                'cal-dispo': jour && jour.dispo,
+                                'cal-complet': jour && jour.complet,
+                                'cal-indispo': jour && !jour.dispo && !jour.complet,
+                                'cal-passe': jour && jour.passe
+                            }"
+                            @click="jour && jour.dispo ? choisirDate(jour) : null"
+                        >
+                            <template v-if="jour">
+                                <span class="cal-jour-num">{{ jour.numero }}</span>
+                                <span v-if="jour.dispo" class="cal-jour-places">{{ jour.inscrits }}/10 inscrits</span>
+                                <span v-if="jour.complet" class="cal-jour-complet">Complet</span>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Etape 2 : Nom + Email -->
+            <div v-if="etape === 2">
+                <h2 class="modal-title">Vos informations</h2>
+
+                <div class="recap-mini">
+                    <span>{{ dateChoisie.nomJour }} {{ dateChoisie.numero }} {{ dateChoisie.nomMois }}</span>
+                    <span>19h30</span>
+                </div>
+                <div class="places-info">
+                    <span class="places-badge">{{ dateChoisie.inscrits }}/10 inscrits</span>
+                    <span class="places-restantes">{{ 10 - dateChoisie.inscrits }} place{{ (10 - dateChoisie.inscrits) > 1 ? 's' : '' }} restante{{ (10 - dateChoisie.inscrits) > 1 ? 's' : '' }}</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="clientNom">Nom complet</label>
+                    <input
+                        id="clientNom"
+                        type="text"
+                        v-model="clientNom"
+                        placeholder="Votre nom"
+                        class="form-input"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="clientEmail">Adresse email</label>
+                    <input
+                        id="clientEmail"
+                        type="email"
+                        v-model="clientEmail"
+                        placeholder="votre@email.com"
+                        class="form-input"
+                        :class="{ 'input-error': emailErreur }"
+                    >
+                    <span class="form-error" v-if="emailErreur">{{ emailErreur }}</span>
+                </div>
+
+                <div class="confirm-actions">
+                    <button class="btn btn-outline" @click="etape = 1">Retour</button>
+                    <button class="btn" @click="reserverCours()" :disabled="envoiEnCours">
+                        <span v-if="!envoiEnCours">Reserver</span>
+                        <span v-else class="spinner"></span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Message de succes -->
+            <div v-if="reservationConfirmee" class="confirm-message">
+                Reservation confirmee ! A bientot {{ clientNom }}.
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>{{ direBonjour() }} — {{ brand }} &copy; 2026</p>
+        <div class="footer-legal">
+            <a href="legal.html#mentions">Mentions legales</a>
+            <a href="legal.html#cgv">CGV</a>
+            <a href="legal.html#confidentialite">Confidentialite</a>
+        </div>
+    </footer>
+
+</div>
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script>
+    Vue.createApp({
+        data() {
+            return {
+                brand: 'Anima Flow',
+                titre: 'Un seul cours par semaine. Enfin du temps pour toi.',
+                sousTitre: 'Yoga, Pilates & renforcement doux en visioconference — 60 min chrono, depuis chez toi, avec Amina.',
+                aproposTexte: 'Passionnee par le mouvement, la sante globale et l\'harmonie corps-esprit, j\'ai fonde Anima Flow pour proposer des pratiques douces et dynamiques — bienveillantes et respectueuses du corps. Mon approche allie rigueur et ecoute, avec pour objectif d\'accompagner chacune vers plus de vitalite, de serenite et de confiance.',
+                citation: 'Educatrice sportive diplomee d\'etat · Instructrice de Yoga · Pilates Matwork niveaux 1, 2 & 3 · Specialisation femme enceinte & senior',
+                contactIntro: 'Une heure. Un tapis. Et Amina qui t\'accompagne. Sans abonnement, annulation libre jusqu\'a 24h avant.',
+                email: 'amina.yakoubi@gmail.com',
+                telephone: '+33 (0)7 77 32 27 61',
+                listeCours: [
+                    {
+                        nom: 'Yoga',
+                        description: 'Des postures accessibles pour relacher les tensions du quotidien et retrouver calme et clarte mentale. Ideal pour les tensions du dos, la fatigue mentale et les nuits agitees.',
+                        niveau: 'Tous niveaux',
+                        icone: '\u{1F9D8}'
+                    },
+                    {
+                        nom: 'Pilates',
+                        description: 'Travail du gainage, du dos et du plancher pelvien. Parfait apres une grossesse ou un mode de vie sedentaire. Renforce en profondeur, en douceur.',
+                        niveau: 'Tous niveaux',
+                        icone: '\u{1F4AA}'
+                    },
+                    {
+                        nom: 'Renforcement doux',
+                        description: 'Des exercices adaptes a ton niveau pour renforcer tout le corps — sans sauter, sans douleur, sans materiel. Pour reprendre le sport progressivement.',
+                        niveau: 'Tous niveaux',
+                        icone: '\u{1F338}'
+                    }
+                ],
+                bienfaits: [
+                    { titre: 'Depuis chez toi', texte: 'Aucun deplacement. Tu ouvres ton ordi et c\'est parti. Depuis ton salon, ta chambre ou ton bureau.', icone: '\u{1F4CD}' },
+                    { titre: 'Un creneau fixe', texte: 'Un seul rendez-vous par semaine que tu peux anticiper et proteger. Pas de planning a jongler.', icone: '\u{1F552}' },
+                    { titre: '10 places max', texte: 'Une vraie proximite, une attention personnalisee. Pas un cours anonyme dans une grande salle.', icone: '\u{1F49B}' },
+                    { titre: 'Prof certifiee', texte: 'Amina connait tes contraintes et les respecte. Rigueur et bienveillance, toujours.', icone: '\u{1F33F}' }
+                ],
+                // Modal & calendrier
+                modalOuverte: false,
+                etape: 1,
+                moisCalendrier: new Date().getMonth(),
+                anneeCalendrier: new Date().getFullYear(),
+                joursNoms: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
+                dateChoisie: null,
+                // Formulaire
+                clientNom: '',
+                clientEmail: '',
+                emailErreur: '',
+                envoiEnCours: false,
+                reservationConfirmee: false,
+                // Compteurs de reservations par date
+                reservationsCounts: {}
+            }
+        },
+        computed: {
+            nomMois() {
+                const noms = ['Janvier', 'Fevrier', 'Mars', 'Avril', 'Mai', 'Juin',
+                    'Juillet', 'Aout', 'Septembre', 'Octobre', 'Novembre', 'Decembre'];
+                return noms[this.moisCalendrier];
+            },
+            joursCalendrier() {
+                const an = this.anneeCalendrier;
+                const mois = this.moisCalendrier;
+                const premierJour = new Date(an, mois, 1);
+                const dernierJour = new Date(an, mois + 1, 0);
+                const nbJours = dernierJour.getDate();
+
+                // getDay() : 0=Dim, on veut 0=Lun
+                let startDay = premierJour.getDay() - 1;
+                if (startDay < 0) startDay = 6;
+
+                const aujourd = new Date();
+                aujourd.setHours(0, 0, 0, 0);
+
+                const jours = [];
+
+                // Cases vides avant le 1er
+                for (let i = 0; i < startDay; i++) {
+                    jours.push(null);
+                }
+
+                for (let d = 1; d <= nbJours; d++) {
+                    const date = new Date(an, mois, d);
+                    const jourSemaine = date.getDay(); // 0=Dim, 1=Lun, 4=Jeu
+                    const estLundiOuJeudi = (jourSemaine === 1 || jourSemaine === 4);
+                    const estPasse = date < aujourd;
+
+                    const dateISO = `${an}-${String(mois + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                    const inscrits = this.reservationsCounts[dateISO] || 0;
+                    const complet = inscrits >= 10;
+
+                    jours.push({
+                        numero: d,
+                        dispo: estLundiOuJeudi && !estPasse && !complet,
+                        complet: estLundiOuJeudi && !estPasse && complet,
+                        passe: estPasse,
+                        date: date,
+                        dateISO: dateISO,
+                        inscrits: inscrits,
+                        estCours: estLundiOuJeudi
+                    });
+                }
+
+                return jours;
+            }
+        },
+        methods: {
+            direBonjour() {
+                return 'Namaste'
+            },
+            async ouvrirModal() {
+                this.modalOuverte = true;
+                this.etape = 1;
+                this.dateChoisie = null;
+                this.clientNom = '';
+                this.clientEmail = '';
+                this.emailErreur = '';
+                this.envoiEnCours = false;
+                this.reservationConfirmee = false;
+                this.moisCalendrier = new Date().getMonth();
+                this.anneeCalendrier = new Date().getFullYear();
+                await this.chargerCompteurs();
+            },
+            async chargerCompteurs() {
+                try {
+                    const response = await fetch('http://localhost:3000/api/reservations/count');
+                    const data = await response.json();
+                    this.reservationsCounts = data;
+                } catch (err) {
+                    console.error('Erreur chargement compteurs:', err);
+                }
+            },
+            fermerModal() {
+                this.modalOuverte = false;
+            },
+            moisPrecedent() {
+                if (this.moisCalendrier === 0) {
+                    this.moisCalendrier = 11;
+                    this.anneeCalendrier--;
+                } else {
+                    this.moisCalendrier--;
+                }
+            },
+            moisSuivant() {
+                if (this.moisCalendrier === 11) {
+                    this.moisCalendrier = 0;
+                    this.anneeCalendrier++;
+                } else {
+                    this.moisCalendrier++;
+                }
+            },
+            choisirDate(jour) {
+                const nomsJours = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+                const nomsMois = ['Janvier', 'Fevrier', 'Mars', 'Avril', 'Mai', 'Juin',
+                    'Juillet', 'Aout', 'Septembre', 'Octobre', 'Novembre', 'Decembre'];
+                this.dateChoisie = {
+                    numero: jour.numero,
+                    nomJour: nomsJours[jour.date.getDay()],
+                    nomMois: nomsMois[jour.date.getMonth()],
+                    annee: jour.date.getFullYear(),
+                    inscrits: jour.inscrits,
+                    dateISO: jour.dateISO
+                };
+                this.etape = 2;
+            },
+            async reserverCours() {
+                // Validation
+                this.emailErreur = '';
+                if (!this.clientNom.trim()) {
+                    this.emailErreur = 'Veuillez entrer votre nom.';
+                    return;
+                }
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(this.clientEmail)) {
+                    this.emailErreur = 'Veuillez entrer un email valide.';
+                    return;
+                }
+
+                this.envoiEnCours = true;
+
+                try {
+                    const dateISO = `${this.dateChoisie.annee}-${String(this.moisCalendrier + 1).padStart(2, '0')}-${String(this.dateChoisie.numero).padStart(2, '0')}`;
+
+                    const response = await fetch('http://localhost:3000/api/reservations', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            nom: this.clientNom,
+                            email: this.clientEmail,
+                            date: dateISO,
+                            heure: '19h30'
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        this.emailErreur = data.error || 'Erreur lors de la reservation.';
+                        this.envoiEnCours = false;
+                        return;
+                    }
+
+                    this.reservationConfirmee = true;
+                    this.envoiEnCours = false;
+                    setTimeout(() => {
+                        this.modalOuverte = false;
+                    }, 3000);
+                } catch (err) {
+                    this.emailErreur = 'Impossible de contacter le serveur.';
+                    this.envoiEnCours = false;
+                }
+            }
+        }
+    }).mount('#mon-app')
+</script>
+</body>
+</html>
