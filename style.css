@@ -1,3 +1,7 @@
+[v-cloak] {
+    display: none;
+}
+
 /* ===== Reset & Base ===== */
 * {
     margin: 0;

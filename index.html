@@ -9,11 +9,11 @@
 </head>
 <body>
 
-<div id="mon-app">
+<div id="mon-app" v-cloak>
 
     <!-- Navigation -->
     <nav class="navbar">
-        <div class="logo">{{ brand }}</div>
+        <div class="logo">Anima Flow</div>
         <button class="burger" @click="menuOuvert = !menuOuvert" :class="{ active: menuOuvert }">
             <span></span>
             <span></span>
@@ -31,8 +31,8 @@
     <!-- Hero -->
     <section id="accueil" class="hero">
         <div class="hero-content">
-            <h1>{{ titre }}</h1>
-            <p class="hero-subtitle">{{ sousTitre }}</p>
+            <h1>Un seul cours par semaine. Enfin du temps pour toi.</h1>
+            <p class="hero-subtitle">Yoga, Pilates & renforcement doux en visioconference — 60 min chrono, depuis chez toi, avec Amina.</p>
             <a href="#contact" class="btn">Je reserve ma place</a>
         </div>
     </section>
@@ -46,8 +46,8 @@
                     <img src="images/amina-portrait.jpg" alt="Amina" class="img-portrait">
                 </div>
                 <div class="apropos-text">
-                    <p>{{ aproposTexte }}</p>
-                    <p class="citation">"{{ citation }}"</p>
+                    <p>Passionnee par le mouvement, la sante globale et l'harmonie corps-esprit, j'ai fonde Anima Flow pour proposer des pratiques douces et dynamiques — bienveillantes et respectueuses du corps. Mon approche allie rigueur et ecoute, avec pour objectif d'accompagner chacune vers plus de vitalite, de serenite et de confiance.</p>
+                    <p class="citation">"Educatrice sportive diplomee d'etat · Instructrice de Yoga · Pilates Matwork niveaux 1, 2 & 3 · Specialisation femme enceinte & senior"</p>
                 </div>
             </div>
         </div>
@@ -58,11 +58,23 @@
         <div class="container">
             <h2>Un cours. Trois disciplines.</h2>
             <div class="cours-grid">
-                <div class="cours-card" v-for="cours in listeCours" :key="cours.nom">
-                    <div class="cours-icon">{{ cours.icone }}</div>
-                    <h3>{{ cours.nom }}</h3>
-                    <p>{{ cours.description }}</p>
-                    <span class="cours-niveau">{{ cours.niveau }}</span>
+                <div class="cours-card">
+                    <div class="cours-icon">&#x1F9D8;</div>
+                    <h3>Yoga</h3>
+                    <p>Des postures accessibles pour relacher les tensions du quotidien et retrouver calme et clarte mentale. Ideal pour les tensions du dos, la fatigue mentale et les nuits agitees.</p>
+                    <span class="cours-niveau">Tous niveaux</span>
+                </div>
+                <div class="cours-card">
+                    <div class="cours-icon">&#x1F4AA;</div>
+                    <h3>Pilates</h3>
+                    <p>Travail du gainage, du dos et du plancher pelvien. Parfait apres une grossesse ou un mode de vie sedentaire. Renforce en profondeur, en douceur.</p>
+                    <span class="cours-niveau">Tous niveaux</span>
+                </div>
+                <div class="cours-card">
+                    <div class="cours-icon">&#x1F338;</div>
+                    <h3>Renforcement doux</h3>
+                    <p>Des exercices adaptes a ton niveau pour renforcer tout le corps — sans sauter, sans douleur, sans materiel. Pour reprendre le sport progressivement.</p>
+                    <span class="cours-niveau">Tous niveaux</span>
                 </div>
             </div>
         </div>
@@ -73,10 +85,25 @@
         <div class="container">
             <h2>Ce qui t'attend avec nous</h2>
             <div class="bienfaits-grid">
-                <div class="bienfait-item" v-for="bienfait in bienfaits" :key="bienfait.titre">
-                    <div class="bienfait-icone">{{ bienfait.icone }}</div>
-                    <h3>{{ bienfait.titre }}</h3>
-                    <p>{{ bienfait.texte }}</p>
+                <div class="bienfait-item">
+                    <div class="bienfait-icone">&#x1F4CD;</div>
+                    <h3>Depuis chez toi</h3>
+                    <p>Aucun deplacement. Tu ouvres ton ordi et c'est parti. Depuis ton salon, ta chambre ou ton bureau.</p>
+                </div>
+                <div class="bienfait-item">
+                    <div class="bienfait-icone">&#x1F552;</div>
+                    <h3>Un creneau fixe</h3>
+                    <p>Un seul rendez-vous par semaine que tu peux anticiper et proteger. Pas de planning a jongler.</p>
+                </div>
+                <div class="bienfait-item">
+                    <div class="bienfait-icone">&#x1F49B;</div>
+                    <h3>10 places max</h3>
+                    <p>Une vraie proximite, une attention personnalisee. Pas un cours anonyme dans une grande salle.</p>
+                </div>
+                <div class="bienfait-item">
+                    <div class="bienfait-icone">&#x1F33F;</div>
+                    <h3>Prof certifiee</h3>
+                    <p>Amina connait tes contraintes et les respecte. Rigueur et bienveillance, toujours.</p>
                 </div>
             </div>
         </div>
@@ -86,15 +113,19 @@
     <section id="contact" class="contact">
         <div class="container">
             <h2>Commence cette semaine</h2>
-            <p class="contact-intro">{{ contactIntro }}</p>
+            <p class="contact-intro">Une heure. Un tapis. Et Amina qui t'accompagne. Sans abonnement, annulation libre jusqu'a 24h avant.</p>
             <div class="contact-info">
                 <div class="info-item">
                     <strong>Email</strong>
-                    <span>{{ email }}</span>
+                    <span>amina.yakoubi@gmail.com</span>
                 </div>
                 <div class="info-item">
                     <strong>Telephone</strong>
-                    <span>{{ telephone }}</span>
+                    <span>+33 (0)7 77 32 27 61</span>
+                </div>
+                <div class="info-item">
+                    <strong>Tarif</strong>
+                    <span>{{ prix }} par seance</span>
                 </div>
                 <div class="info-item">
                     <strong>Format</strong>
@@ -220,7 +251,7 @@
 
     <!-- Footer -->
     <footer class="footer">
-        <p>{{ direBonjour() }} — {{ brand }} &copy; 2026</p>
+        <p>Namaste — Anima Flow &copy; 2026</p>
         <div class="footer-legal">
             <a href="legal.html#mentions">Mentions legales</a>
             <a href="legal.html#cgv">CGV</a>
@@ -235,41 +266,7 @@
     Vue.createApp({
         data() {
             return {
-                brand: 'Anima Flow',
-                titre: 'Un seul cours par semaine. Enfin du temps pour toi.',
-                sousTitre: 'Yoga, Pilates & renforcement doux en visioconference — 60 min chrono, depuis chez toi, avec Amina.',
-                aproposTexte: 'Passionnee par le mouvement, la sante globale et l\'harmonie corps-esprit, j\'ai fonde Anima Flow pour proposer des pratiques douces et dynamiques — bienveillantes et respectueuses du corps. Mon approche allie rigueur et ecoute, avec pour objectif d\'accompagner chacune vers plus de vitalite, de serenite et de confiance.',
-                citation: 'Educatrice sportive diplomee d\'etat · Instructrice de Yoga · Pilates Matwork niveaux 1, 2 & 3 · Specialisation femme enceinte & senior',
-                contactIntro: 'Une heure. Un tapis. Et Amina qui t\'accompagne. Sans abonnement, annulation libre jusqu\'a 24h avant.',
-                email: 'amina.yakoubi@gmail.com',
-                telephone: '+33 (0)7 77 32 27 61',
-                prix: '15€ par seance',
-                listeCours: [
-                    {
-                        nom: 'Yoga',
-                        description: 'Des postures accessibles pour relacher les tensions du quotidien et retrouver calme et clarte mentale. Ideal pour les tensions du dos, la fatigue mentale et les nuits agitees.',
-                        niveau: 'Tous niveaux',
-                        icone: '\u{1F9D8}'
-                    },
-                    {
-                        nom: 'Pilates',
-                        description: 'Travail du gainage, du dos et du plancher pelvien. Parfait apres une grossesse ou un mode de vie sedentaire. Renforce en profondeur, en douceur.',
-                        niveau: 'Tous niveaux',
-                        icone: '\u{1F4AA}'
-                    },
-                    {
-                        nom: 'Renforcement doux',
-                        description: 'Des exercices adaptes a ton niveau pour renforcer tout le corps — sans sauter, sans douleur, sans materiel. Pour reprendre le sport progressivement.',
-                        niveau: 'Tous niveaux',
-                        icone: '\u{1F338}'
-                    }
-                ],
-                bienfaits: [
-                    { titre: 'Depuis chez toi', texte: 'Aucun deplacement. Tu ouvres ton ordi et c\'est parti. Depuis ton salon, ta chambre ou ton bureau.', icone: '\u{1F4CD}' },
-                    { titre: 'Un creneau fixe', texte: 'Un seul rendez-vous par semaine que tu peux anticiper et proteger. Pas de planning a jongler.', icone: '\u{1F552}' },
-                    { titre: '10 places max', texte: 'Une vraie proximite, une attention personnalisee. Pas un cours anonyme dans une grande salle.', icone: '\u{1F49B}' },
-                    { titre: 'Prof certifiee', texte: 'Amina connait tes contraintes et les respecte. Rigueur et bienveillance, toujours.', icone: '\u{1F33F}' }
-                ],
+                prix: '15\u20AC',
                 // Menu mobile
                 menuOuvert: false,
                 // Modal & calendrier
@@ -357,9 +354,6 @@
             }
         },
         methods: {
-            direBonjour() {
-                return 'Namaste'
-            },
             async ouvrirModal() {
                 this.modalOuverte = true;
                 this.etape = 1;
