@@ -79,7 +79,7 @@ a {
     align-items: center;
     justify-content: center;
     text-align: center;
-    background: linear-gradient(135deg, #f5f0eb 0%, #e8e0d8 50%, #d4cdc4 100%);
+    background: linear-gradient(135deg, rgba(245, 240, 235, 0.85), rgba(232, 224, 216, 0.8)), url('images/Background-Hero.jpg') center/cover no-repeat;
     padding: 120px 24px 80px;
 }
 
@@ -143,17 +143,12 @@ a {
     flex-shrink: 0;
 }
 
-.img-placeholder {
+.img-portrait {
     width: 250px;
     height: 250px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #d4cdc4, #b8ad9e);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Playfair Display', serif;
-    font-size: 5rem;
-    color: #fff;
+    object-fit: cover;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
 }
 
 .apropos-text p {
@@ -187,7 +182,7 @@ a {
 
 .cours-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 30px;
 }
 
@@ -514,6 +509,14 @@ a {
     color: #c0392b;
     font-weight: 700;
     cursor: not-allowed;
+}
+
+.cal-absence {
+    background: #f0ebe4;
+    color: #aaa;
+    font-weight: 700;
+    cursor: not-allowed;
+    text-decoration: line-through;
 }
 
 /* ===== Confirmation ===== */
@@ -1119,10 +1122,9 @@ a {
         text-align: center;
     }
 
-    .img-placeholder {
+    .img-portrait {
         width: 180px;
         height: 180px;
-        font-size: 3.5rem;
     }
 
     .citation {

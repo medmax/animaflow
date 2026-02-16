@@ -1,0 +1,7 @@
+{
+  "rewrites": [
+    { "source": "/api/reservations/count", "destination": "/api/reservations/count" },
+    { "source": "/api/reservations", "destination": "/api/reservations" },
+    { "source": "/api/indisponibilites", "destination": "/api/indisponibilites" }
+  ]
+}

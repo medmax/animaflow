@@ -16,10 +16,10 @@
         <div class="logo">{{ brand }}</div>
         <ul class="nav-links">
             <li><a href="#accueil">Accueil</a></li>
-            <li><a href="#apropos">A propos</a></li>
-            <li><a href="#cours">Cours</a></li>
-            <li><a href="#bienfaits">Bienfaits</a></li>
-            <li><a href="#contact">Contact</a></li>
+            <li><a href="#apropos">Amina</a></li>
+            <li><a href="#cours">Les cours</a></li>
+            <li><a href="#bienfaits">Tes avantages</a></li>
+            <li><a href="#contact">Reserver</a></li>
         </ul>
     </nav>
 
@@ -28,17 +28,17 @@
         <div class="hero-content">
             <h1>{{ titre }}</h1>
             <p class="hero-subtitle">{{ sousTitre }}</p>
-            <a href="#cours" class="btn">Decouvrir les cours</a>
+            <a href="#contact" class="btn">Je reserve ma place</a>
         </div>
     </section>
 
     <!-- A propos -->
     <section id="apropos" class="apropos">
         <div class="container">
-            <h2>Rencontrez Amina</h2>
+            <h2>Votre coach : Amina</h2>
             <div class="apropos-content">
                 <div class="apropos-img">
-                    <div class="img-placeholder">A</div>
+                    <img src="images/amina-portrait.jpg" alt="Amina" class="img-portrait">
                 </div>
                 <div class="apropos-text">
                     <p>{{ aproposTexte }}</p>
@@ -66,7 +66,7 @@
     <!-- Bienfaits -->
     <section id="bienfaits" class="bienfaits">
         <div class="container">
-            <h2>Pourquoi Anima Flow</h2>
+            <h2>Ce qui t'attend avec nous</h2>
             <div class="bienfaits-grid">
                 <div class="bienfait-item" v-for="bienfait in bienfaits" :key="bienfait.titre">
                     <div class="bienfait-icone">{{ bienfait.icone }}</div>
@@ -123,7 +123,7 @@
             <!-- Etape 1 : Calendrier -->
             <div v-if="etape === 1">
                 <h2 class="modal-title">Choisir une date</h2>
-                <p class="modal-subtitle">Cours disponibles les lundis et jeudis a 19h30</p>
+                <p class="modal-subtitle">Cours disponibles les lundis a 19h30</p>
 
                 <div class="calendrier">
                     <div class="calendrier-header">
@@ -143,7 +143,8 @@
                                 'cal-vide': !jour,
                                 'cal-dispo': jour && jour.dispo,
                                 'cal-complet': jour && jour.complet,
-                                'cal-indispo': jour && !jour.dispo && !jour.complet,
+                                'cal-absence': jour && jour.indispo,
+                                'cal-indispo': jour && !jour.dispo && !jour.complet && !jour.indispo,
                                 'cal-passe': jour && jour.passe
                             }"
                             @click="jour && jour.dispo ? choisirDate(jour) : null"
@@ -152,6 +153,7 @@
                                 <span class="cal-jour-num">{{ jour.numero }}</span>
                                 <span v-if="jour.dispo" class="cal-jour-places">{{ jour.inscrits }}/10 inscrits</span>
                                 <span v-if="jour.complet" class="cal-jour-complet">Complet</span>
+                                <span v-if="jour.indispo" class="cal-jour-complet">Absent</span>
                             </template>
                         </div>
                     </div>
@@ -236,6 +238,7 @@
                 contactIntro: 'Une heure. Un tapis. Et Amina qui t\'accompagne. Sans abonnement, annulation libre jusqu\'a 24h avant.',
                 email: 'amina.yakoubi@gmail.com',
                 telephone: '+33 (0)7 77 32 27 61',
+                prix: '15€ par seance',
                 listeCours: [
                     {
                         nom: 'Yoga',
@@ -276,7 +279,9 @@
                 envoiEnCours: false,
                 reservationConfirmee: false,
                 // Compteurs de reservations par date
-                reservationsCounts: {}
+                reservationsCounts: {},
+                // Dates d'indisponibilite d'Amina
+                indisponibilites: []
             }
         },
         computed: {
@@ -308,23 +313,25 @@
 
                 for (let d = 1; d <= nbJours; d++) {
                     const date = new Date(an, mois, d);
-                    const jourSemaine = date.getDay(); // 0=Dim, 1=Lun, 4=Jeu
-                    const estLundiOuJeudi = (jourSemaine === 1 || jourSemaine === 4);
+                    const jourSemaine = date.getDay(); // 0=Dim, 1=Lun
+                    const estLundi = (jourSemaine === 1);
                     const estPasse = date < aujourd;
 
                     const dateISO = `${an}-${String(mois + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                     const inscrits = this.reservationsCounts[dateISO] || 0;
                     const complet = inscrits >= 10;
+                    const estIndispo = this.indisponibilites.includes(dateISO);
 
                     jours.push({
                         numero: d,
-                        dispo: estLundiOuJeudi && !estPasse && !complet,
-                        complet: estLundiOuJeudi && !estPasse && complet,
+                        dispo: estLundi && !estPasse && !complet && !estIndispo,
+                        complet: estLundi && !estPasse && complet && !estIndispo,
+                        indispo: estLundi && !estPasse && estIndispo,
                         passe: estPasse,
                         date: date,
                         dateISO: dateISO,
                         inscrits: inscrits,
-                        estCours: estLundiOuJeudi
+                        estCours: estLundi
                     });
                 }
 
@@ -346,15 +353,24 @@
                 this.reservationConfirmee = false;
                 this.moisCalendrier = new Date().getMonth();
                 this.anneeCalendrier = new Date().getFullYear();
-                await this.chargerCompteurs();
+                await Promise.all([this.chargerCompteurs(), this.chargerIndispos()]);
             },
             async chargerCompteurs() {
                 try {
-                    const response = await fetch('http://localhost:3000/api/reservations/count');
+                    const response = await fetch('/api/reservations/count');
                     const data = await response.json();
                     this.reservationsCounts = data;
                 } catch (err) {
                     console.error('Erreur chargement compteurs:', err);
+                }
+            },
+            async chargerIndispos() {
+                try {
+                    const response = await fetch('/api/indisponibilites');
+                    const data = await response.json();
+                    this.indisponibilites = data;
+                } catch (err) {
+                    console.error('Erreur chargement indispos:', err);
                 }
             },
             fermerModal() {
@@ -408,7 +424,7 @@
                 try {
                     const dateISO = `${this.dateChoisie.annee}-${String(this.moisCalendrier + 1).padStart(2, '0')}-${String(this.dateChoisie.numero).padStart(2, '0')}`;
 
-                    const response = await fetch('http://localhost:3000/api/reservations', {
+                    const response = await fetch('/api/reservations', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({

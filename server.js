@@ -15,6 +15,7 @@ app.use(express.static(path.join(__dirname)));
 // Connexion a Notion
 const notion = new Client({ auth: process.env.NOTION_TOKEN });
 const databaseId = process.env.NOTION_DATABASE_ID;
+const indispoDbId = process.env.NOTION_INDISPO_DATABASE_ID;
 
 // POST /api/reservations — Creer une reservation
 app.post('/api/reservations', async (req, res) => {
@@ -84,6 +85,28 @@ app.get('/api/reservations/count', async (req, res) => {
         res.json(counts);
     } catch (err) {
         console.error('Erreur Notion:', err.message);
+        res.status(500).json({ error: 'Erreur serveur.' });
+    }
+});
+
+// GET /api/indisponibilites — Dates ou Amina est indisponible
+app.get('/api/indisponibilites', async (req, res) => {
+    try {
+        const all = await notion.databases.query({
+            database_id: indispoDbId
+        });
+
+        const dates = [];
+        for (const page of all.results) {
+            const dateVal = page.properties['Indisponibilité']?.date?.start;
+            if (dateVal) {
+                dates.push(dateVal);
+            }
+        }
+
+        res.json(dates);
+    } catch (err) {
+        console.error('Erreur Notion indispos:', err.message);
         res.status(500).json({ error: 'Erreur serveur.' });
     }
 });
