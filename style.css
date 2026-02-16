@@ -72,6 +72,44 @@ a {
     color: #5c6b4f;
 }
 
+/* ===== Mobile/Desktop helpers ===== */
+.mobile-only {
+    display: none;
+}
+
+/* ===== Burger ===== */
+.burger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    z-index: 101;
+}
+
+.burger span {
+    display: block;
+    width: 24px;
+    height: 2px;
+    background: #3a3a3a;
+    border-radius: 2px;
+    transition: transform 0.3s, opacity 0.3s;
+}
+
+.burger.active span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+}
+
+.burger.active span:nth-child(2) {
+    opacity: 0;
+}
+
+.burger.active span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+}
+
 /* ===== Hero ===== */
 .hero {
     min-height: 100vh;
@@ -1105,12 +1143,39 @@ a {
         padding: 16px 24px;
     }
 
+    .burger {
+        display: flex;
+    }
+
     .nav-links {
-        gap: 16px;
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 70%;
+        max-width: 300px;
+        height: 100vh;
+        background: #fff;
+        flex-direction: column;
+        padding: 100px 40px 40px;
+        gap: 0;
+        box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
+        transition: right 0.3s ease;
+        z-index: 100;
+    }
+
+    .nav-links.open {
+        right: 0;
+    }
+
+    .nav-links li {
+        border-bottom: 1px solid #f0ebe4;
     }
 
     .nav-links a {
-        font-size: 0.75rem;
+        font-size: 0.95rem;
+        display: block;
+        padding: 16px 0;
+        letter-spacing: 1px;
     }
 
     .hero h1 {
@@ -1145,5 +1210,43 @@ a {
     .contact-info {
         flex-direction: column;
         gap: 30px;
+    }
+
+    .desktop-only {
+        display: none;
+    }
+
+    .mobile-only {
+        display: inline;
+    }
+
+    /* Calendrier mobile */
+    .modal {
+        padding: 24px 16px;
+        width: 95%;
+    }
+
+    .cal-jour {
+        aspect-ratio: auto;
+        padding: 6px 2px;
+        min-height: 48px;
+    }
+
+    .cal-jour-num {
+        font-size: 0.85rem;
+    }
+
+    .cal-jour-places {
+        font-size: 0.45rem;
+        overflow: visible;
+        white-space: nowrap;
+    }
+
+    .cal-jour-complet {
+        font-size: 0.4rem;
+    }
+
+    .cal-grille {
+        gap: 3px;
     }
 }

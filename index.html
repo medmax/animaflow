@@ -14,12 +14,17 @@
     <!-- Navigation -->
     <nav class="navbar">
         <div class="logo">{{ brand }}</div>
-        <ul class="nav-links">
-            <li><a href="#accueil">Accueil</a></li>
-            <li><a href="#apropos">Amina</a></li>
-            <li><a href="#cours">Les cours</a></li>
-            <li><a href="#bienfaits">Tes avantages</a></li>
-            <li><a href="#contact">Reserver</a></li>
+        <button class="burger" @click="menuOuvert = !menuOuvert" :class="{ active: menuOuvert }">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <ul class="nav-links" :class="{ open: menuOuvert }">
+            <li><a href="#accueil" @click="menuOuvert = false">Accueil</a></li>
+            <li><a href="#apropos" @click="menuOuvert = false">Amina</a></li>
+            <li><a href="#cours" @click="menuOuvert = false">Les cours</a></li>
+            <li><a href="#bienfaits" @click="menuOuvert = false">Tes avantages</a></li>
+            <li><a href="#contact" @click="menuOuvert = false">Reserver</a></li>
         </ul>
     </nav>
 
@@ -151,7 +156,7 @@
                         >
                             <template v-if="jour">
                                 <span class="cal-jour-num">{{ jour.numero }}</span>
-                                <span v-if="jour.dispo" class="cal-jour-places">{{ jour.inscrits }}/10 inscrits</span>
+                                <span v-if="jour.dispo" class="cal-jour-places"><span class="desktop-only">{{ jour.inscrits }}/10 inscrits</span><span class="mobile-only">{{ jour.inscrits }}/10</span></span>
                                 <span v-if="jour.complet" class="cal-jour-complet">Complet</span>
                                 <span v-if="jour.indispo" class="cal-jour-complet">Absent</span>
                             </template>
@@ -265,6 +270,8 @@
                     { titre: '10 places max', texte: 'Une vraie proximite, une attention personnalisee. Pas un cours anonyme dans une grande salle.', icone: '\u{1F49B}' },
                     { titre: 'Prof certifiee', texte: 'Amina connait tes contraintes et les respecte. Rigueur et bienveillance, toujours.', icone: '\u{1F33F}' }
                 ],
+                // Menu mobile
+                menuOuvert: false,
                 // Modal & calendrier
                 modalOuverte: false,
                 etape: 1,
