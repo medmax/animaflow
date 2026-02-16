@@ -444,9 +444,14 @@ a {
     transition: background 0.2s, border-color 0.2s;
 }
 
-.cal-nav:hover {
+.cal-nav:hover:not(:disabled) {
     background: #f5f0eb;
     border-color: #bbb;
+}
+
+.cal-nav:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
 }
 
 .cal-mois {

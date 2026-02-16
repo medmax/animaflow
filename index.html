@@ -132,9 +132,9 @@
 
                 <div class="calendrier">
                     <div class="calendrier-header">
-                        <button class="cal-nav" @click="moisPrecedent()">&larr;</button>
+                        <button class="cal-nav" @click="moisPrecedent()" :disabled="estMoisMin">&larr;</button>
                         <span class="cal-mois">{{ nomMois }} {{ anneeCalendrier }}</span>
-                        <button class="cal-nav" @click="moisSuivant()">&rarr;</button>
+                        <button class="cal-nav" @click="moisSuivant()" :disabled="estMoisMax">&rarr;</button>
                     </div>
                     <div class="cal-jours-noms">
                         <span v-for="j in joursNoms" :key="j">{{ j }}</span>
@@ -297,6 +297,17 @@
                     'Juillet', 'Aout', 'Septembre', 'Octobre', 'Novembre', 'Decembre'];
                 return noms[this.moisCalendrier];
             },
+            estMoisMin() {
+                const now = new Date();
+                return this.anneeCalendrier === now.getFullYear() && this.moisCalendrier === now.getMonth();
+            },
+            estMoisMax() {
+                const now = new Date();
+                let maxMois = now.getMonth() + 1;
+                let maxAnnee = now.getFullYear();
+                if (maxMois > 11) { maxMois = 0; maxAnnee++; }
+                return this.anneeCalendrier === maxAnnee && this.moisCalendrier === maxMois;
+            },
             joursCalendrier() {
                 const an = this.anneeCalendrier;
                 const mois = this.moisCalendrier;
@@ -384,6 +395,7 @@
                 this.modalOuverte = false;
             },
             moisPrecedent() {
+                if (this.estMoisMin) return;
                 if (this.moisCalendrier === 0) {
                     this.moisCalendrier = 11;
                     this.anneeCalendrier--;
@@ -392,6 +404,7 @@
                 }
             },
             moisSuivant() {
+                if (this.estMoisMax) return;
                 if (this.moisCalendrier === 11) {
                     this.moisCalendrier = 0;
                     this.anneeCalendrier++;
