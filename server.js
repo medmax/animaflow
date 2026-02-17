@@ -36,7 +36,7 @@ function formatDateFR(dateISO) {
 
 // POST /api/reservations — Creer une reservation
 app.post('/api/reservations', async (req, res) => {
-    const { nom, email, date, heure } = req.body;
+    const { nom, email, telephone, date, heure } = req.body;
 
     if (!nom || !email || !date) {
         return res.status(400).json({ error: 'Nom, email et date sont requis.' });
@@ -69,6 +69,12 @@ app.post('/api/reservations', async (req, res) => {
                 },
                 Heure: {
                     rich_text: [{ text: { content: heure } }]
+                },
+                'Téléphone': {
+                    phone_number: telephone || null
+                },
+                'Réservé le': {
+                    date: { start: new Date().toISOString() }
                 }
             }
         });

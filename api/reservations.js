@@ -25,7 +25,7 @@ module.exports = async function handler(req, res) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const { nom, email, date, heure } = req.body;
+    const { nom, email, telephone, date, heure } = req.body;
 
     if (!nom || !email || !date) {
         return res.status(400).json({ error: 'Nom, email et date sont requis.' });
@@ -58,6 +58,12 @@ module.exports = async function handler(req, res) {
                 },
                 Heure: {
                     rich_text: [{ text: { content: heure } }]
+                },
+                'Téléphone': {
+                    phone_number: telephone || null
+                },
+                'Réservé le': {
+                    date: { start: new Date().toISOString() }
                 }
             }
         });

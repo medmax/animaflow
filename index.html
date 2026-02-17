@@ -281,6 +281,17 @@
                     <span class="form-error" v-if="emailErreur">{{ emailErreur }}</span>
                 </div>
 
+                <div class="form-group">
+                    <label for="clientTel">Telephone</label>
+                    <input
+                        id="clientTel"
+                        type="tel"
+                        v-model="clientTel"
+                        placeholder="06 12 34 56 78"
+                        class="form-input"
+                    >
+                </div>
+
                 <div class="confirm-actions">
                     <button class="btn btn-outline" @click="etape = 1">Retour</button>
                     <button class="btn" @click="reserverCours()" :disabled="envoiEnCours">
@@ -327,6 +338,7 @@
                 // Formulaire
                 clientNom: '',
                 clientEmail: '',
+                clientTel: '',
                 emailErreur: '',
                 envoiEnCours: false,
                 reservationConfirmee: false,
@@ -408,6 +420,7 @@
                 this.dateChoisie = null;
                 this.clientNom = '';
                 this.clientEmail = '';
+                this.clientTel = '';
                 this.emailErreur = '';
                 this.envoiEnCours = false;
                 this.reservationConfirmee = false;
@@ -492,6 +505,7 @@
                         body: JSON.stringify({
                             nom: this.clientNom,
                             email: this.clientEmail,
+                            telephone: this.clientTel,
                             date: dateISO,
                             heure: '19h30'
                         })
