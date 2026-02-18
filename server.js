@@ -4,11 +4,14 @@ const { Client } = require('@notionhq/client');
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 
+const Stripe = require('stripe');
 const path = require('path');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // Servir les fichiers statiques (index.html, style.css, etc.)
 app.use(express.static(path.join(__dirname)));
@@ -33,6 +36,35 @@ function formatDateFR(dateISO) {
     const d = new Date(dateISO + 'T12:00:00');
     return `${jours[d.getDay()]} ${d.getDate()} ${mois[d.getMonth()]} ${d.getFullYear()}`;
 }
+
+// POST /api/create-payment-intent — Creer un PaymentIntent Stripe
+app.post('/api/create-payment-intent', async (req, res) => {
+    const { nom, email, date, heure } = req.body;
+
+    if (!nom || !email || !date) {
+        return res.status(400).json({ error: 'Nom, email et date sont requis.' });
+    }
+
+    try {
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount: 1500, // 15€ en centimes
+            currency: 'eur',
+            payment_method_types: ['card'],
+            metadata: {
+                nom,
+                email,
+                date,
+                heure: heure || '19h30'
+            },
+            receipt_email: email
+        });
+
+        res.json({ clientSecret: paymentIntent.client_secret });
+    } catch (err) {
+        console.error('Erreur Stripe:', err.message);
+        res.status(500).json({ error: 'Erreur lors de la creation du paiement.' });
+    }
+});
 
 // POST /api/reservations — Creer une reservation
 app.post('/api/reservations', async (req, res) => {

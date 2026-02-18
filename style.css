@@ -1087,7 +1087,7 @@ a {
     font-weight: 700;
 }
 
-.stripe-card-element {
+#card-element {
     padding: 14px 16px;
     border: 1px solid #ddd;
     border-radius: 10px;
@@ -1095,41 +1095,39 @@ a {
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.stripe-card-element.StripeElement--focus {
+#card-element.StripeElement--focus {
     border-color: #5c6b4f;
     box-shadow: 0 0 0 3px rgba(92, 107, 79, 0.1);
 }
 
-.stripe-card-element.StripeElement--invalid {
+#card-element.StripeElement--invalid {
     border-color: #e74c3c;
 }
 
-.btn-payer {
-    display: block;
-    width: 100%;
-    padding: 16px;
-    margin-top: 20px;
-    background: #5c6b4f;
-    color: #fff;
-    border: none;
-    border-radius: 50px;
-    font-family: 'Lato', sans-serif;
-    font-size: 1rem;
+.recap-paiement {
+    margin-bottom: 20px;
+}
+
+.recap-paiement .recap-mini {
+    margin-bottom: 8px;
+}
+
+.recap-ligne {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 16px;
+    background: #f5f0eb;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    color: #3a3a3a;
+}
+
+.recap-prix {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
     font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: background 0.3s, transform 0.3s;
-}
-
-.btn-payer:hover:not(:disabled) {
-    background: #4a5840;
-    transform: translateY(-2px);
-}
-
-.btn-payer:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+    color: #5c6b4f;
 }
 
 .spinner {
@@ -1144,14 +1142,6 @@ a {
 
 @keyframes spin {
     to { transform: rotate(360deg); }
-}
-
-.stripe-mention {
-    text-align: center;
-    font-size: 0.75rem;
-    color: #aaa;
-    margin-top: 16px;
-    letter-spacing: 0.5px;
 }
 
 /* ===== Footer ===== */

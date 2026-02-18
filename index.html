@@ -54,6 +54,7 @@
 
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
 
@@ -228,9 +229,14 @@
                     <span class="step-label">Date</span>
                 </div>
                 <div class="step-line" :class="{ active: etape >= 2 }"></div>
-                <div class="step" :class="{ active: etape >= 2 }">
+                <div class="step" :class="{ active: etape >= 2, done: etape > 2 }">
                     <span class="step-num">2</span>
                     <span class="step-label">Infos</span>
+                </div>
+                <div class="step-line" :class="{ active: etape >= 3 }"></div>
+                <div class="step" :class="{ active: etape >= 3 }">
+                    <span class="step-num">3</span>
+                    <span class="step-label">Paiement</span>
                 </div>
             </div>
 
@@ -324,8 +330,38 @@
 
                 <div class="confirm-actions">
                     <button class="btn btn-outline" @click="etape = 1">Retour</button>
-                    <button class="btn" @click="reserverCours()" :disabled="envoiEnCours">
-                        <span v-if="!envoiEnCours">Reserver</span>
+                    <button class="btn" @click="allerAuPaiement()" :disabled="envoiEnCours">
+                        <span v-if="!envoiEnCours">Continuer vers le paiement</span>
+                        <span v-else class="spinner"></span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Etape 3 : Paiement -->
+            <div v-if="etape === 3">
+                <h2 class="modal-title">Paiement</h2>
+
+                <div class="recap-paiement">
+                    <div class="recap-mini">
+                        <span>{{ dateChoisie.nomJour }} {{ dateChoisie.numero }} {{ dateChoisie.nomMois }}</span>
+                        <span>19h30</span>
+                    </div>
+                    <div class="recap-ligne">
+                        <span>{{ clientNom }}</span>
+                        <span class="recap-prix">15&euro;</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Carte bancaire</label>
+                    <div id="card-element"></div>
+                    <span class="form-error" v-if="paiementErreur">{{ paiementErreur }}</span>
+                </div>
+
+                <div class="confirm-actions">
+                    <button class="btn btn-outline" @click="retourEtape2()">Retour</button>
+                    <button class="btn" @click="confirmerPaiement()" :disabled="envoiEnCours">
+                        <span v-if="!envoiEnCours">Payer 15&euro;</span>
                         <span v-else class="spinner"></span>
                     </button>
                 </div>
@@ -373,6 +409,11 @@
                 emailErreur: '',
                 envoiEnCours: false,
                 reservationConfirmee: false,
+                // Stripe
+                stripe: null,
+                cardElement: null,
+                clientSecret: '',
+                paiementErreur: '',
                 // Compteurs de reservations par date
                 reservationsCounts: {},
                 // Dates d'indisponibilite d'Amina
@@ -512,7 +553,7 @@
                 };
                 this.etape = 2;
             },
-            async reserverCours() {
+            async allerAuPaiement() {
                 // Validation
                 this.emailErreur = '';
                 if (!this.clientNom.trim()) {
@@ -528,15 +569,15 @@
                 this.envoiEnCours = true;
 
                 try {
-                    const dateISO = `${this.dateChoisie.annee}-${String(this.moisCalendrier + 1).padStart(2, '0')}-${String(this.dateChoisie.numero).padStart(2, '0')}`;
+                    const dateISO = this.dateChoisie.dateISO;
 
-                    const response = await fetch('/api/reservations', {
+                    // Creer le PaymentIntent
+                    const response = await fetch('/api/create-payment-intent', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             nom: this.clientNom,
                             email: this.clientEmail,
-                            telephone: this.clientTel,
                             date: dateISO,
                             heure: '19h30'
                         })
@@ -545,18 +586,110 @@
                     const data = await response.json();
 
                     if (!response.ok) {
-                        this.emailErreur = data.error || 'Erreur lors de la reservation.';
+                        this.emailErreur = data.error || 'Erreur lors de la creation du paiement.';
                         this.envoiEnCours = false;
                         return;
                     }
 
-                    this.reservationConfirmee = true;
+                    this.clientSecret = data.clientSecret;
                     this.envoiEnCours = false;
-                    setTimeout(() => {
-                        this.modalOuverte = false;
-                    }, 3000);
+                    this.etape = 3;
+
+                    // Monter Stripe Elements apres le rendu du DOM
+                    this.$nextTick(() => this.monterStripeElements());
                 } catch (err) {
                     this.emailErreur = 'Impossible de contacter le serveur.';
+                    this.envoiEnCours = false;
+                }
+            },
+            monterStripeElements() {
+                if (!this.stripe) {
+                    this.stripe = Stripe('pk_test_51T2Cpp9cD83akzSCPOtiInDSMXVW5alSXv8gejdBETNOwYgFg4YfOAxmlTfVg0Vrz4fix9jeFDgKi5gwOP0t07vK00jVVvp4eG', {
+                        locale: 'fr'
+                    });
+                }
+                const elements = this.stripe.elements();
+                this.cardElement = elements.create('card', {
+                    hidePostalCode: true,
+                    style: {
+                        base: {
+                            fontSize: '16px',
+                            color: '#333',
+                            fontFamily: "'Lato', sans-serif",
+                            '::placeholder': { color: '#999' }
+                        },
+                        invalid: { color: '#e74c3c' }
+                    }
+                });
+                this.cardElement.mount('#card-element');
+                this.cardElement.on('change', (event) => {
+                    this.paiementErreur = event.error ? event.error.message : '';
+                });
+            },
+            retourEtape2() {
+                if (this.cardElement) {
+                    this.cardElement.unmount();
+                    this.cardElement = null;
+                }
+                this.paiementErreur = '';
+                this.etape = 2;
+            },
+            async confirmerPaiement() {
+                this.paiementErreur = '';
+                this.envoiEnCours = true;
+
+                try {
+                    const { error, paymentIntent } = await this.stripe.confirmCardPayment(
+                        this.clientSecret,
+                        {
+                            payment_method: {
+                                card: this.cardElement,
+                                billing_details: {
+                                    name: this.clientNom,
+                                    email: this.clientEmail
+                                }
+                            }
+                        }
+                    );
+
+                    if (error) {
+                        this.paiementErreur = error.message;
+                        this.envoiEnCours = false;
+                        return;
+                    }
+
+                    if (paymentIntent.status === 'succeeded') {
+                        // Paiement OK → enregistrer la reservation dans Notion + emails
+                        const dateISO = this.dateChoisie.dateISO;
+
+                        const response = await fetch('/api/reservations', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                nom: this.clientNom,
+                                email: this.clientEmail,
+                                telephone: this.clientTel,
+                                date: dateISO,
+                                heure: '19h30'
+                            })
+                        });
+
+                        const data = await response.json();
+
+                        if (!response.ok) {
+                            this.paiementErreur = data.error || 'Paiement reussi mais erreur de reservation. Contactez-nous.';
+                            this.envoiEnCours = false;
+                            return;
+                        }
+
+                        this.reservationConfirmee = true;
+                        this.envoiEnCours = false;
+                        setTimeout(() => {
+                            this.modalOuverte = false;
+                        }, 3000);
+                    }
+                } catch (err) {
+                    this.paiementErreur = 'Erreur lors du paiement. Veuillez reessayer.';
                     this.envoiEnCours = false;
                 }
             }
