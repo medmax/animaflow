@@ -16,6 +16,11 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 // Servir les fichiers statiques (index.html, style.css, etc.)
 app.use(express.static(path.join(__dirname)));
 
+// GET /api/config — Cle publique Stripe
+app.get('/api/config', (req, res) => {
+    res.json({ stripePublishableKey: process.env.STRIPE_PUBLISHABLE_KEY });
+});
+
 // Connexion a Notion
 const notion = new Client({ auth: process.env.NOTION_TOKEN });
 const databaseId = process.env.NOTION_DATABASE_ID;

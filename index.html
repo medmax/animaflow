@@ -602,9 +602,11 @@
                     this.envoiEnCours = false;
                 }
             },
-            monterStripeElements() {
+            async monterStripeElements() {
                 if (!this.stripe) {
-                    this.stripe = Stripe('pk_test_51T2Cpp9cD83akzSCPOtiInDSMXVW5alSXv8gejdBETNOwYgFg4YfOAxmlTfVg0Vrz4fix9jeFDgKi5gwOP0t07vK00jVVvp4eG', {
+                    const configRes = await fetch('/api/config');
+                    const { stripePublishableKey } = await configRes.json();
+                    this.stripe = Stripe(stripePublishableKey, {
                         locale: 'fr'
                     });
                 }
