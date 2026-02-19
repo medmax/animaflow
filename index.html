@@ -489,6 +489,10 @@
         methods: {
             async ouvrirModal() {
                 this.modalOuverte = true;
+                umami.track('reservation_clicked', {
+                    page: 'home',
+                    source: 'cta_main'
+                    });
                 this.etape = 1;
                 this.dateChoisie = null;
                 this.clientNom = '';
